@@ -1,0 +1,6 @@
+{
+  "name": "Token Four",
+  "symbol": "$TOKEN4",
+  "description": "Just another token.",
+  "image": "http://localhost:7000/token4.jpg"
+}
