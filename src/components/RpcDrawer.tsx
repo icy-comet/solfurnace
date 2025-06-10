@@ -1,4 +1,8 @@
 "use client";
+import React, { ChangeEvent, useCallback, useContext, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
+import { useQueryClient } from "@tanstack/react-query";
+import { ChainContext } from "@/context/ChainContext";
 import {
   Sheet,
   SheetContent,
@@ -8,9 +12,6 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import React, { ChangeEvent, useContext, useState } from "react";
-import { ChainContext } from "@/context/ChainContext";
-import { useDebouncedCallback } from "use-debounce";
 
 type Props = {
   open: boolean;
@@ -21,6 +22,11 @@ export function RpcDrawer({ open, setOpen }: Props) {
   const { setChain } = useContext(ChainContext);
   const [isInputVisible, setIsInputVisible] = useState(false);
   const [isValidURL, setIsValidURL] = useState(true);
+  const queryClient = useQueryClient();
+  const commonBtnCallback = useCallback(async () => {
+    setIsInputVisible(false);
+    await queryClient.invalidateQueries({ queryKey: ["status"] });
+  }, [queryClient, setIsInputVisible]);
   const setChainFromInput = useDebouncedCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       try {
@@ -47,25 +53,25 @@ export function RpcDrawer({ open, setOpen }: Props) {
             Mainnet (Custom)
           </Button>
           <Button
-            onClick={() => {
+            onClick={async () => {
               setChain("solana:devnet");
-              setIsInputVisible(false);
+              await commonBtnCallback();
             }}
           >
             Devnet
           </Button>
           <Button
-            onClick={() => {
+            onClick={async () => {
               setChain("solana:testnet");
-              setIsInputVisible(false);
+              await commonBtnCallback();
             }}
           >
             Testnet
           </Button>
           <Button
-            onClick={() => {
+            onClick={async () => {
               setChain("solana:localnet");
-              setIsInputVisible(false);
+              await commonBtnCallback();
             }}
           >
             Localnet

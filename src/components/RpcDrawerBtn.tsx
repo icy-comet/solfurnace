@@ -11,7 +11,7 @@ export function RpcDrawerBtn() {
   const { rpc } = useContext(RpcContext);
   const { displayName } = useContext(ChainContext);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { isSuccess } = useQuery({
+  const { isSuccess, isFetching } = useQuery({
     queryKey: ["status"],
     queryFn: async () => {
       const res = await rpc.getHealth().send();
@@ -20,18 +20,18 @@ export function RpcDrawerBtn() {
       }
       return true;
     },
-    refetchInterval: 5000,
     retry: false,
+    staleTime: 5 * 1000,
   });
   return (
     <>
       <Button
         className={`flex flex-wrap justify-center items-center cursor-pointer ${
-          isSuccess ? "bg-green-800" : "bg-red-800"
+          !isFetching && isSuccess ? "bg-green-800" : "bg-red-800"
         }`}
         onClick={() => setDrawerOpen(true)}
       >
-        {isSuccess ? <CircleCheckBig /> : <CircleX />}
+        {!isFetching && isSuccess ? <CircleCheckBig /> : <CircleX />}
         {displayName}
       </Button>
       <RpcDrawer open={drawerOpen} setOpen={setDrawerOpen} />
