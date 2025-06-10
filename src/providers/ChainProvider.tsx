@@ -8,8 +8,10 @@ import {
   TESTNET_CONFIG,
 } from "@/lib/chainContextStates";
 import { ChainContext } from "@/context/ChainContext";
+import { mainnet } from "gill";
 
-const STORAGE_KEY = "solfurnace:selected-chain";
+const MONIKER_STORAGE_KEY = "solfurnace:selected-chain";
+const RPCURL_STORAGE_KEY = "solfurnace:custom-rpc-url";
 
 export function ChainContextProvider({
   children,
@@ -18,10 +20,13 @@ export function ChainContextProvider({
 }) {
   // use default chain config
   const [chain, setChain] = useState(() => "solana:localnet");
+  const [customRpcUrl, setCustomRpcUrl] = useState<string>("");
 
   useEffect(() => {
-    const chainId = localStorage.getItem(STORAGE_KEY);
-    if (chainId) setChain(chainId);
+    const chain = localStorage.getItem(MONIKER_STORAGE_KEY);
+    const customRpc = localStorage.getItem(RPCURL_STORAGE_KEY);
+    if (chain) setChain(chain);
+    if (customRpc) setCustomRpcUrl(customRpc);
   }, []);
 
   const contextValue = useMemo<ChainContextState>(() => {
@@ -34,8 +39,25 @@ export function ChainContextProvider({
         return DEVNET_CONFIG;
       case "solana:localnet":
         return LOCALNET_CONFIG;
+      case "solana:custom":
+        return {
+          chain: "solana:mainnet",
+          displayName: "Mainnet (Custom)",
+          solanaExplorerClusterName: "mainnet-beta",
+          solanaRpcSubscriptionsUrl: mainnet(
+            `${
+              customRpcUrl.startsWith("https")
+                ? customRpcUrl.replace("https", "wss")
+                : customRpcUrl.replace("http", "ws")
+            }`
+          ),
+          solanaRpcUrl: mainnet(customRpcUrl),
+        };
       default:
-        if (typeof window !== "undefined") localStorage.removeItem(STORAGE_KEY);
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(MONIKER_STORAGE_KEY);
+          localStorage.removeItem(RPCURL_STORAGE_KEY);
+        }
         return DEVNET_CONFIG;
     }
   }, [chain]);
@@ -44,9 +66,13 @@ export function ChainContextProvider({
       value={useMemo(
         () => ({
           ...contextValue,
-          setChain(chain) {
-            localStorage.setItem(STORAGE_KEY, chain);
+          setChain(chain, customRpcUrl) {
+            localStorage.setItem(MONIKER_STORAGE_KEY, chain);
             setChain(chain);
+            if (customRpcUrl) {
+              localStorage.setItem(RPCURL_STORAGE_KEY, customRpcUrl);
+              setCustomRpcUrl(customRpcUrl);
+            }
           },
         }),
         [contextValue]

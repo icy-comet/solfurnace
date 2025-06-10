@@ -12,7 +12,7 @@ import { fetchAllMetadata, getTokenMetadataAddress } from "gill/programs";
 import { AtaData, MintsDataCollection } from "@/lib/customTypes";
 import { TokenView } from "@/components/TokenView";
 
-export const Test = () => {
+export const TokenList = () => {
   const { rpc } = useContext(RpcContext);
   const { activeWalletAccount } = useContext(ActiveWalletAccountContext);
 

@@ -3,7 +3,7 @@ import { ClusterUrl, mainnet, testnet, devnet } from "@solana/kit";
 export type ChainContextState = Readonly<{
   chain: `solana:${string}`;
   displayName: string;
-  setChain?(chain: `solana:${string}`): void;
+  setChain?(chain: `solana:${string}`, rpcUrl?: string): void;
   solanaExplorerClusterName: "devnet" | "mainnet-beta" | "testnet" | "localnet";
   solanaRpcSubscriptionsUrl: ClusterUrl;
   solanaRpcUrl: ClusterUrl;
